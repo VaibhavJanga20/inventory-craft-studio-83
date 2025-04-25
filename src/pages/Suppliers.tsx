@@ -1,7 +1,8 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { MapPin, Plus } from "lucide-react";
+import { EditDialog } from "../components/EditDialog";
+import { Button } from "@/components/ui/button";
 
 type Supplier = {
   id: string;
@@ -31,6 +32,8 @@ const initialSuppliers: Supplier[] = [
 export default function Suppliers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,6 +41,30 @@ export default function Suppliers() {
     supplier.location.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
     supplier.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleEdit = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSave = (data: Record<string, any>) => {
+    const updatedSuppliers = suppliers.map((supplier) =>
+      supplier.id === selectedSupplier?.id
+        ? {
+            ...supplier,
+            name: data.name,
+            location: {
+              ...supplier.location,
+              city: data.city,
+              state: data.state,
+              zipCode: data.zipCode,
+            },
+            activeOrders: parseInt(data.activeOrders)
+          }
+        : supplier
+    );
+    setSuppliers(updatedSuppliers);
+  };
 
   return (
     <div>
@@ -88,13 +115,37 @@ export default function Suppliers() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{supplier.activeOrders}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">Edit</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleEdit(supplier)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {selectedSupplier && (
+        <EditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleSave}
+          title="Supplier"
+          fields={[
+            { name: "name", label: "Name", type: "text", value: selectedSupplier.name },
+            { name: "city", label: "City", type: "text", value: selectedSupplier.location.city },
+            { name: "state", label: "State", type: "text", value: selectedSupplier.location.state },
+            { name: "zipCode", label: "Zip Code", type: "text", value: selectedSupplier.location.zipCode },
+            { name: "activeOrders", label: "Active Orders", type: "number", value: selectedSupplier.activeOrders },
+          ]}
+        />
+      )}
     </div>
   );
 }

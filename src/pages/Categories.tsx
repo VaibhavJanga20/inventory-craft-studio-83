@@ -1,7 +1,8 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Plus } from "lucide-react";
+import { EditDialog } from "../components/EditDialog";
+import { Button } from "@/components/ui/button";
 
 type Category = {
   id: string;
@@ -27,12 +28,34 @@ const initialCategories: Category[] = [
 export default function Categories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleEdit = (category: Category) => {
+    setSelectedCategory(category);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSave = (data: Record<string, any>) => {
+    const updatedCategories = categories.map((category) =>
+      category.id === selectedCategory?.id
+        ? {
+            ...category,
+            name: data.name,
+            description: data.description,
+            items: parseInt(data.items),
+            createdOn: category.createdOn
+          }
+        : category
+    );
+    setCategories(updatedCategories);
+  };
 
   return (
     <div>
@@ -84,13 +107,35 @@ export default function Categories() {
                   <td className="px-6 py-4 text-sm text-gray-500">{category.description}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{category.createdOn}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{category.items}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">Edit</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleEdit(category)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {selectedCategory && (
+        <EditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleSave}
+          title="Category"
+          fields={[
+            { name: "name", label: "Name", type: "text", value: selectedCategory.name },
+            { name: "description", label: "Description", type: "text", value: selectedCategory.description },
+            { name: "items", label: "Items", type: "number", value: selectedCategory.items },
+          ]}
+        />
+      )}
     </div>
   );
 }

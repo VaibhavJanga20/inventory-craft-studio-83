@@ -1,7 +1,8 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Plus } from "lucide-react";
+import { EditDialog } from "../components/EditDialog";
+import { Button } from "@/components/ui/button";
 
 type InventoryItem = {
   id: string;
@@ -27,6 +28,8 @@ const initialInventory: InventoryItem[] = [
 export default function Inventory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [inventory, setInventory] = useState<InventoryItem[]>(initialInventory);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const filteredInventory = inventory.filter(item =>
     item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,6 +47,26 @@ export default function Inventory() {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const handleEdit = (item: InventoryItem) => {
+    setSelectedItem(item);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSave = (data: Record<string, any>) => {
+    const updatedInventory = inventory.map((item) =>
+      item.id === selectedItem?.id
+        ? {
+            ...item,
+            category: data.category,
+            quantity: parseInt(data.quantity),
+            status: data.status as "In Stock" | "Low Stock" | "Out of Stock",
+            lastUpdated: new Date().toISOString().split('T')[0] + ' ' + new Date().toLocaleTimeString().slice(0, 5)
+          }
+        : item
+    );
+    setInventory(updatedInventory);
   };
 
   return (
@@ -100,13 +123,35 @@ export default function Inventory() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.lastUpdated}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">Edit</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleEdit(item)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {selectedItem && (
+        <EditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleSave}
+          title="Inventory Item"
+          fields={[
+            { name: "category", label: "Category", type: "text", value: selectedItem.category },
+            { name: "quantity", label: "Quantity", type: "number", value: selectedItem.quantity },
+            { name: "status", label: "Status", type: "text", value: selectedItem.status },
+          ]}
+        />
+      )}
     </div>
   );
 }
