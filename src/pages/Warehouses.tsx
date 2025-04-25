@@ -1,7 +1,8 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { MapPin, Plus } from "lucide-react";
+import { AddDialog } from "../components/AddDialog";
+import { Button } from "@/components/ui/button";
 
 type Warehouse = {
   id: string;
@@ -33,6 +34,7 @@ const initialWarehouses: Warehouse[] = [
 export default function Warehouses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [warehouses, setWarehouses] = useState<Warehouse[]>(initialWarehouses);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const filteredWarehouses = warehouses.filter(warehouse =>
     warehouse.location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,6 +56,23 @@ export default function Warehouses() {
     return "bg-green-500";
   };
 
+  const handleAdd = (data: Record<string, any>) => {
+    const newWarehouse: Warehouse = {
+      id: `WH-${String(warehouses.length + 1).padStart(3, '0')}`,
+      location: {
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode
+      },
+      managedBy: data.managedBy,
+      capacity: {
+        used: parseInt(data.usedCapacity),
+        total: parseInt(data.totalCapacity)
+      }
+    };
+    setWarehouses([...warehouses, newWarehouse]);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -61,10 +80,13 @@ export default function Warehouses() {
           <h1 className="text-2xl font-semibold mb-1">Warehouses</h1>
           <p className="text-gray-600 text-sm">Manage warehouse locations and capacity</p>
         </div>
-        <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
+        <Button 
+          className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
           <Plus size={18} className="mr-2" />
           Add Warehouse
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
@@ -120,6 +142,21 @@ export default function Warehouses() {
           </table>
         </div>
       </div>
+
+      <AddDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onAdd={handleAdd}
+        title="Warehouse"
+        fields={[
+          { name: "city", label: "City", type: "text" },
+          { name: "state", label: "State", type: "text" },
+          { name: "zipCode", label: "Zip Code", type: "text" },
+          { name: "managedBy", label: "Managed By", type: "text" },
+          { name: "usedCapacity", label: "Used Capacity", type: "number" },
+          { name: "totalCapacity", label: "Total Capacity", type: "number" }
+        ]}
+      />
     </div>
   );
 }

@@ -1,7 +1,8 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Filter, Plus } from "lucide-react";
+import { AddDialog } from "../components/AddDialog";
+import { Button } from "@/components/ui/button";
 
 type Product = {
   id: string;
@@ -25,6 +26,7 @@ const initialProducts: Product[] = [
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,6 +59,17 @@ export default function Products() {
     return "text-green-500";
   };
 
+  const handleAdd = (data: Record<string, any>) => {
+    const newProduct: Product = {
+      id: `PRD-${String(products.length + 1).padStart(3, '0')}`,
+      name: data.name,
+      category: data.category,
+      price: parseFloat(data.price),
+      stock: parseInt(data.stock)
+    };
+    setProducts([...products, newProduct]);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -64,12 +77,13 @@ export default function Products() {
           <h1 className="text-2xl font-semibold mb-1">Products</h1>
           <p className="text-gray-600 text-sm">Manage your product inventory</p>
         </div>
-        <button 
+        <Button 
           className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
+          onClick={() => setIsAddDialogOpen(true)}
         >
           <Plus size={18} className="mr-2" />
           Add Product
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
@@ -136,6 +150,19 @@ export default function Products() {
           </table>
         </div>
       </div>
+
+      <AddDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onAdd={handleAdd}
+        title="Product"
+        fields={[
+          { name: "name", label: "Name", type: "text" },
+          { name: "category", label: "Category", type: "text" },
+          { name: "price", label: "Price", type: "number" },
+          { name: "stock", label: "Stock", type: "number" }
+        ]}
+      />
     </div>
   );
 }

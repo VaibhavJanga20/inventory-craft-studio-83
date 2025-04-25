@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Plus } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
+import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
 
 type Category = {
@@ -30,6 +31,7 @@ export default function Categories() {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,6 +59,17 @@ export default function Categories() {
     setCategories(updatedCategories);
   };
 
+  const handleAdd = (data: Record<string, any>) => {
+    const newCategory: Category = {
+      id: `CAT-${String(categories.length + 1).padStart(3, '0')}`,
+      name: data.name,
+      description: data.description,
+      items: parseInt(data.items),
+      createdOn: new Date().toISOString().split('T')[0]
+    };
+    setCategories([...categories, newCategory]);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -64,10 +77,13 @@ export default function Categories() {
           <h1 className="text-2xl font-semibold mb-1">Categories</h1>
           <p className="text-gray-600 text-sm">Manage product categories</p>
         </div>
-        <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
+        <Button 
+          className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
           <Plus size={18} className="mr-2" />
           Add Category
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
@@ -133,6 +149,20 @@ export default function Categories() {
             { name: "name", label: "Name", type: "text", value: selectedCategory.name },
             { name: "description", label: "Description", type: "text", value: selectedCategory.description },
             { name: "items", label: "Items", type: "number", value: selectedCategory.items },
+          ]}
+        />
+      )}
+
+      {isAddDialogOpen && (
+        <AddDialog
+          isOpen={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onAdd={handleAdd}
+          title="Category"
+          fields={[
+            { name: "name", label: "Name", type: "text" },
+            { name: "description", label: "Description", type: "text" },
+            { name: "items", label: "Items", type: "number" },
           ]}
         />
       )}
