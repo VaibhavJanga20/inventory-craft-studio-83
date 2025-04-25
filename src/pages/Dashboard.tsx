@@ -1,5 +1,6 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { Package2, PackageCheck, Users } from "lucide-react";
 
 const categoryData = [
   { name: "Electronics", count: 140 },
@@ -164,3 +165,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
