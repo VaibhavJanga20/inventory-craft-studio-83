@@ -10,6 +10,7 @@ import {
   UserCircle,
   Warehouse,
   Settings,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { name: "Categories", path: "/categories", icon: FolderTree },
   { name: "Suppliers", path: "/suppliers", icon: Users },
   { name: "Orders", path: "/orders", icon: PackageCheck },
+  { name: "Customers", path: "/customers", icon: User },
   { name: "Employees", path: "/employees", icon: UserCircle },
   { name: "Warehouses", path: "/warehouses", icon: Warehouse },
   { name: "Settings", path: "/settings", icon: Settings },

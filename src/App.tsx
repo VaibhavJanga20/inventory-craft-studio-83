@@ -13,6 +13,7 @@ import Suppliers from "./pages/Suppliers";
 import Orders from "./pages/Orders";
 import Employees from "./pages/Employees";
 import Warehouses from "./pages/Warehouses";
+import Customers from "./pages/Customers";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/orders" element={<Layout><Orders /></Layout>} />
           <Route path="/employees" element={<Layout><Employees /></Layout>} />
           <Route path="/warehouses" element={<Layout><Warehouses /></Layout>} />
+          <Route path="/customers" element={<Layout><Customers /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

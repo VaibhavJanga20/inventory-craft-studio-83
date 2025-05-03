@@ -6,7 +6,7 @@ import { ReportDialog } from "./ReportDialog";
 
 type ReportButtonProps = {
   title: string;
-  type: "products" | "inventory" | "categories" | "suppliers" | "orders" | "warehouses";
+  type: "products" | "inventory" | "categories" | "suppliers" | "orders" | "warehouses" | "customers";
   data: any[];
 };
 

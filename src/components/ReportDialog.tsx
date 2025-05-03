@@ -1,43 +1,45 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, Bar, LineChart, Line, PieChart, Pie, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   ResponsiveContainer, Cell 
 } from "recharts";
-
-type TimeRange = "weekly" | "monthly" | "yearly";
+import { Printer } from "lucide-react";
 
 type ReportDialogProps = {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  type: "products" | "inventory" | "categories" | "suppliers" | "orders" | "warehouses";
+  type: "products" | "inventory" | "categories" | "suppliers" | "orders" | "warehouses" | "customers";
   data: any[];
 };
 
 const COLORS = ["#8B5CF6", "#D946EF", "#F97316", "#0EA5E9", "#10B981", "#F59E0B"];
 
 export function ReportDialog({ isOpen, onClose, title, type, data }: ReportDialogProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>("monthly");
+  const handlePrint = () => {
+    window.print();
+  };
 
   const renderReport = () => {
     switch (type) {
       case "products":
-        return <ProductReport data={data} timeRange={timeRange} />;
+        return <ProductReport data={data} />;
       case "inventory":
-        return <InventoryReport data={data} timeRange={timeRange} />;
+        return <InventoryReport data={data} />;
       case "categories":
-        return <CategoriesReport data={data} timeRange={timeRange} />;
+        return <CategoriesReport data={data} />;
       case "suppliers":
-        return <SuppliersReport data={data} timeRange={timeRange} />;
+        return <SuppliersReport data={data} />;
       case "orders":
-        return <OrdersReport data={data} timeRange={timeRange} />;
+        return <OrdersReport data={data} />;
       case "warehouses":
-        return <WarehousesReport data={data} timeRange={timeRange} />;
+        return <WarehousesReport data={data} />;
+      case "customers":
+        return <CustomersReport data={data} />;
       default:
         return <div>No report available for this section</div>;
     }
@@ -46,21 +48,16 @@ export function ReportDialog({ isOpen, onClose, title, type, data }: ReportDialo
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="text-xl font-semibold">{title} Report</DialogTitle>
+          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
+            <Printer size={16} />
+            <span>Print Report</span>
+          </Button>
         </DialogHeader>
         
-        <div className="mt-4">
-          <Tabs defaultValue={timeRange} onValueChange={(value) => setTimeRange(value as TimeRange)}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              <TabsTrigger value="yearly">Yearly</TabsTrigger>
-            </TabsList>
-            <TabsContent value={timeRange} className="mt-4">
-              {renderReport()}
-            </TabsContent>
-          </Tabs>
+        <div className="mt-4 print:m-6">
+          {renderReport()}
         </div>
       </DialogContent>
     </Dialog>
@@ -68,12 +65,12 @@ export function ReportDialog({ isOpen, onClose, title, type, data }: ReportDialo
 }
 
 // Product Report Component
-function ProductReport({ data, timeRange }: { data: any[], timeRange: TimeRange }) {
-  // Generate sample data based on the products data for different time ranges
+function ProductReport({ data }: { data: any[] }) {
   const categoryData = processCategoryData(data);
   const priceRangeData = processPriceRangeData(data);
-  const stockTrendData = generateStockTrendData(data, timeRange);
-
+  const topSellingProducts = [...data].sort((a, b) => b.stock - a.stock).slice(0, 5);
+  const productsByCategory = getProductsByCategory(data);
+  
   return (
     <div className="space-y-8">
       <div>
@@ -140,21 +137,59 @@ function ProductReport({ data, timeRange }: { data: any[], timeRange: TimeRange 
       </div>
 
       <div>
-        <h3 className="font-medium mb-4">Stock Level Trend ({timeRange})</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={stockTrendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="Electronics" stroke="#8B5CF6" strokeWidth={2} />
-              <Line type="monotone" dataKey="Furniture" stroke="#D946EF" strokeWidth={2} />
-              <Line type="monotone" dataKey="Clothing" stroke="#F97316" strokeWidth={2} />
-              <Line type="monotone" dataKey="Kitchen" stroke="#0EA5E9" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+        <h3 className="font-medium mb-4">Top 5 Products by Stock</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">Product ID</th>
+              <th className="px-4 py-2 text-left">Product Name</th>
+              <th className="px-4 py-2 text-left">Category</th>
+              <th className="px-4 py-2 text-left">Price</th>
+              <th className="px-4 py-2 text-left">Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topSellingProducts.map((product, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{product.id}</td>
+                <td className="px-4 py-2">{product.name}</td>
+                <td className="px-4 py-2">{product.category}</td>
+                <td className="px-4 py-2">${product.price.toFixed(2)}</td>
+                <td className="px-4 py-2">{product.stock}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div>
+        <h3 className="font-medium mb-4">Products By Category Breakdown</h3>
+        <div className="grid grid-cols-1 gap-4">
+          {Object.keys(productsByCategory).map((category, idx) => (
+            <div key={idx} className="border border-gray-200 rounded-md p-4">
+              <h4 className="font-semibold mb-2">{category}</h4>
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-2 text-left">Product Name</th>
+                      <th className="px-4 py-2 text-left">Price</th>
+                      <th className="px-4 py-2 text-left">Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productsByCategory[category].map((product, productIdx) => (
+                      <tr key={productIdx} className={productIdx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                        <td className="px-4 py-2">{product.name}</td>
+                        <td className="px-4 py-2">${product.price.toFixed(2)}</td>
+                        <td className="px-4 py-2">{product.stock}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -162,15 +197,16 @@ function ProductReport({ data, timeRange }: { data: any[], timeRange: TimeRange 
 }
 
 // Inventory Report Component
-function InventoryReport({ data, timeRange }: { data: any[], timeRange: TimeRange }) {
+function InventoryReport({ data }: { data: any[] }) {
   const stockStatusData = [
     { name: "In Stock", value: data.filter(item => item.status === "In Stock").length },
     { name: "Low Stock", value: data.filter(item => item.status === "Low Stock").length },
     { name: "Out of Stock", value: data.filter(item => item.status === "Out of Stock").length },
   ];
 
-  const inventoryTrendData = generateInventoryTrendData(data, timeRange);
   const categoryStockData = processCategoryStockData(data);
+  const lowStockItems = data.filter(item => item.status === "Low Stock");
+  const outOfStockItems = data.filter(item => item.status === "Out of Stock");
 
   return (
     <div className="space-y-8">
@@ -237,35 +273,63 @@ function InventoryReport({ data, timeRange }: { data: any[], timeRange: TimeRang
       </div>
 
       <div>
-        <h3 className="font-medium mb-4">Inventory Level Trend ({timeRange})</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={inventoryTrendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="total" stroke="#8B5CF6" strokeWidth={2} name="Total Stock" />
-              <Line type="monotone" dataKey="lowStock" stroke="#F59E0B" strokeWidth={2} name="Low Stock" />
-              <Line type="monotone" dataKey="outOfStock" stroke="#EF4444" strokeWidth={2} name="Out of Stock" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <h3 className="font-medium mb-4">Low Stock Items</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">Item ID</th>
+              <th className="px-4 py-2 text-left">Category</th>
+              <th className="px-4 py-2 text-left">Quantity</th>
+              <th className="px-4 py-2 text-left">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lowStockItems.map((item, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{item.id}</td>
+                <td className="px-4 py-2">{item.category}</td>
+                <td className="px-4 py-2">{item.quantity}</td>
+                <td className="px-4 py-2">{item.lastUpdated}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div>
+        <h3 className="font-medium mb-4">Out of Stock Items</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">Item ID</th>
+              <th className="px-4 py-2 text-left">Category</th>
+              <th className="px-4 py-2 text-left">Quantity</th>
+              <th className="px-4 py-2 text-left">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {outOfStockItems.map((item, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{item.id}</td>
+                <td className="px-4 py-2">{item.category}</td>
+                <td className="px-4 py-2">{item.quantity}</td>
+                <td className="px-4 py-2">{item.lastUpdated}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
 // Categories Report Component
-function CategoriesReport({ data, timeRange }: { data: any[], timeRange: TimeRange }) {
+function CategoriesReport({ data }: { data: any[] }) {
   const categoriesData = data.map(category => ({
     name: category.name,
     items: category.items
   })).sort((a, b) => b.items - a.items);
 
-  const categoryGrowthData = generateCategoryGrowthData(data, timeRange);
-  
   return (
     <div className="space-y-8">
       <div>
@@ -334,36 +398,38 @@ function CategoriesReport({ data, timeRange }: { data: any[], timeRange: TimeRan
       </div>
 
       <div>
-        <h3 className="font-medium mb-4">Category Growth ({timeRange})</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={categoryGrowthData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {data.slice(0, 5).map((category, index) => (
-                <Line 
-                  key={category.id} 
-                  type="monotone" 
-                  dataKey={category.name} 
-                  stroke={COLORS[index % COLORS.length]} 
-                  strokeWidth={2} 
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <h3 className="font-medium mb-4">Category Details</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">ID</th>
+              <th className="px-4 py-2 text-left">Category Name</th>
+              <th className="px-4 py-2 text-left">Description</th>
+              <th className="px-4 py-2 text-left">Items Count</th>
+              <th className="px-4 py-2 text-left">Created On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((category, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{category.id}</td>
+                <td className="px-4 py-2">{category.name}</td>
+                <td className="px-4 py-2">{category.description}</td>
+                <td className="px-4 py-2">{category.items}</td>
+                <td className="px-4 py-2">{category.createdOn}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
 // Suppliers Report Component
-function SuppliersReport({ data, timeRange }: { data: any[], timeRange: TimeRange }) {
+function SuppliersReport({ data }: { data: any[] }) {
   const locationData = processSupplierLocationData(data);
-  const ordersTrendData = generateSupplierOrdersTrendData(data, timeRange);
+  const topSuppliers = [...data].sort((a, b) => b.activeOrders - a.activeOrders).slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -440,42 +506,76 @@ function SuppliersReport({ data, timeRange }: { data: any[], timeRange: TimeRang
       </div>
 
       <div>
-        <h3 className="font-medium mb-4">Order Trend by Top Suppliers ({timeRange})</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={ordersTrendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {data.slice(0, 5).sort((a, b) => b.activeOrders - a.activeOrders).map((supplier, index) => (
-                <Line 
-                  key={supplier.id} 
-                  type="monotone" 
-                  dataKey={supplier.name} 
-                  stroke={COLORS[index % COLORS.length]} 
-                  strokeWidth={2} 
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <h3 className="font-medium mb-4">Top Active Order Suppliers</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">Supplier Name</th>
+              <th className="px-4 py-2 text-left">Contact</th>
+              <th className="px-4 py-2 text-left">Location</th>
+              <th className="px-4 py-2 text-left">Active Orders</th>
+              <th className="px-4 py-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topSuppliers.map((supplier, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{supplier.name}</td>
+                <td className="px-4 py-2">{supplier.contact}</td>
+                <td className="px-4 py-2">{`${supplier.location.city}, ${supplier.location.state}`}</td>
+                <td className="px-4 py-2">{supplier.activeOrders}</td>
+                <td className="px-4 py-2">{supplier.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div>
+        <h3 className="font-medium mb-4">Supplier Location Distribution</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">State</th>
+              <th className="px-4 py-2 text-left">Number of Suppliers</th>
+              <th className="px-4 py-2 text-left">Total Orders</th>
+            </tr>
+          </thead>
+          <tbody>
+            {locationData.map((location, index) => {
+              const stateSuppliers = data.filter(s => s.location.state === location.state);
+              const totalOrders = stateSuppliers.reduce((sum, s) => sum + s.activeOrders, 0);
+              
+              return (
+                <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                  <td className="px-4 py-2">{location.state}</td>
+                  <td className="px-4 py-2">{location.count}</td>
+                  <td className="px-4 py-2">{totalOrders}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
 // Orders Report Component
-function OrdersReport({ data, timeRange }: { data: any[], timeRange: TimeRange }) {
+function OrdersReport({ data }: { data: any[] }) {
   const statusData = [
     { name: "Completed", value: data.filter(order => order.status === "Completed").length },
     { name: "Processing", value: data.filter(order => order.status === "Processing").length },
     { name: "Pending", value: data.filter(order => order.status === "Pending").length },
   ];
 
-  const ordersTrendData = generateOrdersTrendData(data, timeRange);
-  const revenueData = generateRevenueData(data, timeRange);
+  const orderValueData = processOrderValueData(data);
+  
+  // Calculate total revenue
+  const totalRevenue = data.reduce((sum, order) => sum + order.total, 0);
+  
+  // Calculate average order value
+  const avgOrderValue = totalRevenue / data.length;
 
   return (
     <div className="space-y-8">
@@ -489,13 +589,13 @@ function OrdersReport({ data, timeRange }: { data: any[], timeRange: TimeRange }
           <div className="bg-blue-50 p-4 rounded-lg">
             <p className="text-sm text-gray-500">Total Revenue</p>
             <p className="text-2xl font-semibold">
-              ${data.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
+              ${totalRevenue.toFixed(2)}
             </p>
           </div>
           <div className="bg-green-50 p-4 rounded-lg">
             <p className="text-sm text-gray-500">Avg. Order Value</p>
             <p className="text-2xl font-semibold">
-              ${(data.reduce((sum, order) => sum + order.total, 0) / data.length).toFixed(2)}
+              ${avgOrderValue.toFixed(2)}
             </p>
           </div>
         </div>
@@ -532,7 +632,7 @@ function OrdersReport({ data, timeRange }: { data: any[], timeRange: TimeRange }
           <h3 className="font-medium mb-4">Order Value Distribution</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={processOrderValueData(data)}>
+              <BarChart data={orderValueData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="range" />
                 <YAxis />
@@ -544,36 +644,110 @@ function OrdersReport({ data, timeRange }: { data: any[], timeRange: TimeRange }
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <h3 className="font-medium mb-4">Orders Trend ({timeRange})</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={ordersTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="orders" stroke="#8B5CF6" strokeWidth={2} name="Orders" />
-              </LineChart>
-            </ResponsiveContainer>
+      <div>
+        <h3 className="font-medium mb-4">Order Details</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">Order ID</th>
+              <th className="px-4 py-2 text-left">Date</th>
+              <th className="px-4 py-2 text-left">Status</th>
+              <th className="px-4 py-2 text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((order, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{order.id}</td>
+                <td className="px-4 py-2">{order.date}</td>
+                <td className="px-4 py-2">
+                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full 
+                    ${order.status === 'Completed' ? 'bg-green-100 text-green-800' : 
+                      order.status === 'Processing' ? 'bg-blue-100 text-blue-800' : 
+                      'bg-yellow-100 text-yellow-800'}`}>
+                    {order.status}
+                  </span>
+                </td>
+                <td className="px-4 py-2 text-right">${order.total.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-gray-100 font-semibold">
+              <td className="px-4 py-2" colSpan={3}>Total Revenue</td>
+              <td className="px-4 py-2 text-right">${totalRevenue.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+      <div>
+        <h3 className="font-medium mb-4">Order Status Breakdown</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <h4 className="font-medium mb-2 text-green-600">Completed Orders</h4>
+            <table className="min-w-full border border-gray-200 rounded-md">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left">Order ID</th>
+                  <th className="px-4 py-2 text-left">Date</th>
+                  <th className="px-4 py-2 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.filter(order => order.status === "Completed").map((order, index) => (
+                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="px-4 py-2">{order.id}</td>
+                    <td className="px-4 py-2">{order.date}</td>
+                    <td className="px-4 py-2 text-right">${order.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-
-        <div>
-          <h3 className="font-medium mb-4">Revenue Trend ({timeRange})</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
-                <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={2} name="Revenue" />
-              </LineChart>
-            </ResponsiveContainer>
+          
+          <div>
+            <h4 className="font-medium mb-2 text-blue-600">Processing Orders</h4>
+            <table className="min-w-full border border-gray-200 rounded-md">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left">Order ID</th>
+                  <th className="px-4 py-2 text-left">Date</th>
+                  <th className="px-4 py-2 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.filter(order => order.status === "Processing").map((order, index) => (
+                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="px-4 py-2">{order.id}</td>
+                    <td className="px-4 py-2">{order.date}</td>
+                    <td className="px-4 py-2 text-right">${order.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2 text-yellow-600">Pending Orders</h4>
+            <table className="min-w-full border border-gray-200 rounded-md">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left">Order ID</th>
+                  <th className="px-4 py-2 text-left">Date</th>
+                  <th className="px-4 py-2 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.filter(order => order.status === "Pending").map((order, index) => (
+                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="px-4 py-2">{order.id}</td>
+                    <td className="px-4 py-2">{order.date}</td>
+                    <td className="px-4 py-2 text-right">${order.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -582,15 +756,22 @@ function OrdersReport({ data, timeRange }: { data: any[], timeRange: TimeRange }
 }
 
 // Warehouses Report Component
-function WarehousesReport({ data, timeRange }: { data: any[], timeRange: TimeRange }) {
+function WarehousesReport({ data }: { data: any[] }) {
   const capacityData = data.map(warehouse => ({
     name: warehouse.location.city,
     used: warehouse.capacity.used,
     available: warehouse.capacity.total - warehouse.capacity.used,
   }));
 
-  const utilizationTrendData = generateWarehouseUtilizationTrendData(data, timeRange);
-  
+  // Calculate utilization percentages
+  const utilizationByWarehouse = data.map(warehouse => ({
+    name: warehouse.location.city + ", " + warehouse.location.state,
+    utilization: Math.round((warehouse.capacity.used / warehouse.capacity.total) * 100),
+    capacity: warehouse.capacity.total,
+    used: warehouse.capacity.used,
+    available: warehouse.capacity.total - warehouse.capacity.used
+  }));
+
   return (
     <div className="space-y-8">
       <div>
@@ -665,26 +846,209 @@ function WarehousesReport({ data, timeRange }: { data: any[], timeRange: TimeRan
       </div>
 
       <div>
-        <h3 className="font-medium mb-4">Warehouse Utilization Trend ({timeRange})</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={utilizationTrendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {data.slice(0, 5).map((warehouse, index) => (
-                <Line 
-                  key={warehouse.id} 
-                  type="monotone" 
-                  dataKey={warehouse.location.city} 
-                  stroke={COLORS[index % COLORS.length]} 
-                  strokeWidth={2} 
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
+        <h3 className="font-medium mb-4">Warehouse Utilization Details</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">Warehouse</th>
+              <th className="px-4 py-2 text-left">Total Capacity</th>
+              <th className="px-4 py-2 text-left">Used Capacity</th>
+              <th className="px-4 py-2 text-left">Available Capacity</th>
+              <th className="px-4 py-2 text-left">Utilization %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {utilizationByWarehouse.map((warehouse, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{warehouse.name}</td>
+                <td className="px-4 py-2">{warehouse.capacity.toLocaleString()}</td>
+                <td className="px-4 py-2">{warehouse.used.toLocaleString()}</td>
+                <td className="px-4 py-2">{warehouse.available.toLocaleString()}</td>
+                <td className="px-4 py-2">
+                  <div className="flex items-center">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div className={`h-2.5 rounded-full ${
+                        warehouse.utilization > 80 ? 'bg-red-500' : 
+                        warehouse.utilization > 60 ? 'bg-yellow-500' : 'bg-green-500'
+                      }`} style={{ width: `${warehouse.utilization}%` }}></div>
+                    </div>
+                    <span className="ml-2">{warehouse.utilization}%</span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div>
+        <h3 className="font-medium mb-4">Warehouse Details by Location</h3>
+        <div className="space-y-4">
+          {data.map((warehouse, idx) => (
+            <div key={idx} className="border border-gray-200 rounded-md p-4">
+              <h4 className="font-semibold text-lg mb-2">
+                {warehouse.location.city}, {warehouse.location.state} (ID: {warehouse.id})
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p><strong>Manager:</strong> {warehouse.manager}</p>
+                  <p><strong>Phone:</strong> {warehouse.phone}</p>
+                  <p><strong>Address:</strong> {warehouse.location.address}</p>
+                  <p><strong>Zip:</strong> {warehouse.location.zip}</p>
+                </div>
+                <div>
+                  <p><strong>Total Capacity:</strong> {warehouse.capacity.total.toLocaleString()} units</p>
+                  <p><strong>Used Capacity:</strong> {warehouse.capacity.used.toLocaleString()} units</p>
+                  <p><strong>Available:</strong> {(warehouse.capacity.total - warehouse.capacity.used).toLocaleString()} units</p>
+                  <p><strong>Utilization:</strong> {Math.round((warehouse.capacity.used / warehouse.capacity.total) * 100)}%</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Customers Report Component
+function CustomersReport({ data }: { data: any[] }) {
+  // Get customers by state
+  const customersByState: Record<string, number> = {};
+  data.forEach(customer => {
+    if (customersByState[customer.state]) {
+      customersByState[customer.state]++;
+    } else {
+      customersByState[customer.state] = 1;
+    }
+  });
+
+  const stateData = Object.keys(customersByState).map(state => ({
+    state,
+    count: customersByState[state]
+  }));
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="font-medium text-lg mb-4">Customers Overview</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <p className="text-sm text-gray-500">Total Customers</p>
+            <p className="text-2xl font-semibold">{data.length}</p>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <p className="text-sm text-gray-500">States Covered</p>
+            <p className="text-2xl font-semibold">
+              {Object.keys(customersByState).length}
+            </p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-lg">
+            <p className="text-sm text-gray-500">Top State</p>
+            <p className="text-2xl font-semibold">
+              {stateData.sort((a, b) => b.count - a.count)[0]?.state || "N/A"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <h3 className="font-medium mb-4">Customers by State</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stateData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="state" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8B5CF6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-medium mb-4">Customer Distribution by State</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stateData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="count"
+                  nameKey="state"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {stateData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-medium mb-4">Customer Details</h3>
+        <table className="min-w-full border border-gray-200 rounded-md">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left">ID</th>
+              <th className="px-4 py-2 text-left">Name</th>
+              <th className="px-4 py-2 text-left">City</th>
+              <th className="px-4 py-2 text-left">State</th>
+              <th className="px-4 py-2 text-left">Zip Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((customer, index) => (
+              <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                <td className="px-4 py-2">{customer.id}</td>
+                <td className="px-4 py-2">{customer.name}</td>
+                <td className="px-4 py-2">{customer.city}</td>
+                <td className="px-4 py-2">{customer.state}</td>
+                <td className="px-4 py-2">{customer.zipcode}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div>
+        <h3 className="font-medium mb-4">Customers By State</h3>
+        <div className="space-y-4">
+          {Object.keys(customersByState).sort().map((state, idx) => (
+            <div key={idx} className="border border-gray-200 rounded-md p-4">
+              <h4 className="font-semibold mb-2">{state} ({customersByState[state]} customers)</h4>
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-2 text-left">ID</th>
+                    <th className="px-4 py-2 text-left">Name</th>
+                    <th className="px-4 py-2 text-left">City</th>
+                    <th className="px-4 py-2 text-left">Zip Code</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.filter(c => c.state === state).map((customer, customerIdx) => (
+                    <tr key={customerIdx} className={customerIdx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="px-4 py-2">{customer.id}</td>
+                      <td className="px-4 py-2">{customer.name}</td>
+                      <td className="px-4 py-2">{customer.city}</td>
+                      <td className="px-4 py-2">{customer.zipcode}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -786,185 +1150,16 @@ function processSupplierLocationData(suppliers: any[]) {
   }));
 }
 
-// Helper functions to generate trend data
-function generateStockTrendData(products: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-
-  const categories = [...new Set(products.map(product => product.category))].slice(0, 4);
+function getProductsByCategory(products: any[]) {
+  const categories: Record<string, any[]> = {};
   
-  for (let i = 0; i < periods; i++) {
-    const entry: any = {
-      name: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
-    };
-    
-    categories.forEach(category => {
-      // Generate some random data that looks realistic
-      entry[category] = Math.floor(
-        (products.filter(p => p.category === category).reduce((sum, p) => sum + p.stock, 0) / 
-        products.filter(p => p.category === category).length) * 
-        (0.8 + Math.sin(i / periods * Math.PI) * 0.2 + Math.random() * 0.1)
-      );
-    });
-    
-    data.push(entry);
-  }
+  products.forEach(product => {
+    if (categories[product.category]) {
+      categories[product.category].push(product);
+    } else {
+      categories[product.category] = [product];
+    }
+  });
   
-  return data;
-}
-
-function generateInventoryTrendData(items: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-  
-  const totalItems = items.length;
-  const lowStockItems = items.filter(item => item.status === "Low Stock").length;
-  const outOfStockItems = items.filter(item => item.status === "Out of Stock").length;
-  
-  for (let i = 0; i < periods; i++) {
-    data.push({
-      date: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-      total: totalItems + Math.floor(Math.sin(i / periods * Math.PI * 2) * (totalItems * 0.1)) + Math.floor(Math.random() * 10),
-      lowStock: lowStockItems + Math.floor(Math.cos(i / periods * Math.PI) * (lowStockItems * 0.2)) + Math.floor(Math.random() * 5),
-      outOfStock: outOfStockItems + Math.floor(Math.sin(i / periods * Math.PI) * (outOfStockItems * 0.15)) + Math.floor(Math.random() * 3)
-    });
-  }
-  
-  return data;
-}
-
-function generateCategoryGrowthData(categories: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-  
-  for (let i = 0; i < periods; i++) {
-    const entry: any = {
-      date: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-    };
-    
-    categories.slice(0, 5).forEach(category => {
-      // Generate some random growth data
-      const growth = category.items * (0.9 + (i / periods) * 0.2 + Math.sin(i / (periods / 2) * Math.PI) * 0.05);
-      entry[category.name] = Math.floor(growth);
-    });
-    
-    data.push(entry);
-  }
-  
-  return data;
-}
-
-function generateSupplierOrdersTrendData(suppliers: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-  
-  // Sort suppliers by active orders, descending
-  const topSuppliers = [...suppliers].sort((a, b) => b.activeOrders - a.activeOrders).slice(0, 5);
-  
-  for (let i = 0; i < periods; i++) {
-    const entry: any = {
-      date: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-    };
-    
-    topSuppliers.forEach(supplier => {
-      // Generate some random order data
-      entry[supplier.name] = Math.max(0, Math.floor(
-        supplier.activeOrders * (0.8 + Math.sin(i / periods * Math.PI * 2) * 0.3 + Math.random() * 0.2)
-      ));
-    });
-    
-    data.push(entry);
-  }
-  
-  return data;
-}
-
-function generateOrdersTrendData(orders: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-  
-  const avgOrders = orders.length / periods;
-  
-  for (let i = 0; i < periods; i++) {
-    data.push({
-      date: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-      orders: Math.max(0, Math.floor(avgOrders * (0.7 + Math.sin(i / periods * Math.PI * 2) * 0.4 + Math.random() * 0.2)))
-    });
-  }
-  
-  return data;
-}
-
-function generateRevenueData(orders: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-  
-  const avgOrderValue = orders.reduce((sum, order) => sum + order.total, 0) / orders.length;
-  const avgOrdersPerPeriod = orders.length / periods;
-  
-  for (let i = 0; i < periods; i++) {
-    // Generate daily/monthly/yearly revenue with some realistic patterns
-    const periodRevenue = avgOrderValue * avgOrdersPerPeriod * 
-      (0.7 + Math.sin(i / periods * Math.PI * 2) * 0.4 + Math.random() * 0.2);
-    
-    data.push({
-      date: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-      revenue: Math.floor(periodRevenue * 100) / 100
-    });
-  }
-  
-  return data;
-}
-
-function generateWarehouseUtilizationTrendData(warehouses: any[], timeRange: TimeRange) {
-  const periods = timeRange === "weekly" ? 7 : timeRange === "monthly" ? 30 : 12;
-  const data = [];
-  
-  for (let i = 0; i < periods; i++) {
-    const entry: any = {
-      date: timeRange === "weekly" 
-        ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][i % 7]
-        : timeRange === "monthly" 
-          ? `Day ${i + 1}` 
-          : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i],
-    };
-    
-    warehouses.slice(0, 5).forEach(warehouse => {
-      // Calculate utilization percentage with some variation
-      const utilization = (warehouse.capacity.used / warehouse.capacity.total) * 100;
-      
-      // Add some realistic fluctuation to the trend data
-      entry[warehouse.location.city] = Math.min(100, Math.max(0, Math.floor(
-        utilization * (0.9 + Math.sin(i / (periods / 2) * Math.PI) * 0.1 + Math.random() * 0.05)
-      )));
-    });
-    
-    data.push(entry);
-  }
-  
-  return data;
+  return categories;
 }
