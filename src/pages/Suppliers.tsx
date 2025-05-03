@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { MapPin, Plus } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
 import { Button } from "@/components/ui/button";
+import { ReportButton } from "../components/ReportButton";
 
 type Supplier = {
   id: string;
@@ -73,10 +75,13 @@ export default function Suppliers() {
           <h1 className="text-2xl font-semibold mb-1">Suppliers</h1>
           <p className="text-gray-600 text-sm">Manage your supplier relationships</p>
         </div>
-        <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
-          <Plus size={18} className="mr-2" />
-          Add Supplier
-        </button>
+        <div className="flex space-x-3">
+          <ReportButton title="Suppliers" type="suppliers" data={suppliers} />
+          <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
+            <Plus size={18} className="mr-2" />
+            Add Supplier
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">

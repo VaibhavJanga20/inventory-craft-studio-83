@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Plus } from "lucide-react";
+import { ReportButton } from "../components/ReportButton";
 
 type Order = {
   id: string;
@@ -53,10 +54,13 @@ export default function Orders() {
           <h1 className="text-2xl font-semibold mb-1">Orders</h1>
           <p className="text-gray-600 text-sm">Manage customer orders</p>
         </div>
-        <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
-          <Plus size={18} className="mr-2" />
-          Add Order
-        </button>
+        <div className="flex space-x-3">
+          <ReportButton title="Orders" type="orders" data={orders} />
+          <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
+            <Plus size={18} className="mr-2" />
+            Add Order
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">

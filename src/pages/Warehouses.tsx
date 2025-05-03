@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { MapPin, Plus } from "lucide-react";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
+import { ReportButton } from "../components/ReportButton";
 
 type Warehouse = {
   id: string;
@@ -80,13 +82,16 @@ export default function Warehouses() {
           <h1 className="text-2xl font-semibold mb-1">Warehouses</h1>
           <p className="text-gray-600 text-sm">Manage warehouse locations and capacity</p>
         </div>
-        <Button 
-          className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus size={18} className="mr-2" />
-          Add Warehouse
-        </Button>
+        <div className="flex space-x-3">
+          <ReportButton title="Warehouses" type="warehouses" data={warehouses} />
+          <Button 
+            className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus size={18} className="mr-2" />
+            Add Warehouse
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">

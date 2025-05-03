@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Filter, Plus } from "lucide-react";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
+import { ReportButton } from "../components/ReportButton";
 
 type Product = {
   id: string;
@@ -77,13 +79,16 @@ export default function Products() {
           <h1 className="text-2xl font-semibold mb-1">Products</h1>
           <p className="text-gray-600 text-sm">Manage your product inventory</p>
         </div>
-        <Button 
-          className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus size={18} className="mr-2" />
-          Add Product
-        </Button>
+        <div className="flex space-x-3">
+          <ReportButton title="Products" type="products" data={products} />
+          <Button 
+            className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus size={18} className="mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
