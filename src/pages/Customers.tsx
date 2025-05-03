@@ -25,7 +25,17 @@ const initialCustomers: Customer[] = [
   { id: "CUST-007", name: "David Miller", city: "San Antonio", state: "Texas", zipcode: "78205" },
   { id: "CUST-008", name: "Jennifer Wilson", city: "San Diego", state: "California", zipcode: "92101" },
   { id: "CUST-009", name: "James Taylor", city: "Dallas", state: "Texas", zipcode: "75201" },
-  { id: "CUST-010", name: "Elizabeth Anderson", city: "San Jose", state: "California", zipcode: "95101" }
+  { id: "CUST-010", name: "Elizabeth Anderson", city: "San Jose", state: "California", zipcode: "95101" },
+  { id: "CUST-011", name: "Richard Martinez", city: "Seattle", state: "Washington", zipcode: "98101" },
+  { id: "CUST-012", name: "Patricia Thomas", city: "Denver", state: "Colorado", zipcode: "80201" },
+  { id: "CUST-013", name: "Charles White", city: "Boston", state: "Massachusetts", zipcode: "02108" },
+  { id: "CUST-014", name: "Linda Garcia", city: "Austin", state: "Texas", zipcode: "73301" },
+  { id: "CUST-015", name: "Joseph Lee", city: "Portland", state: "Oregon", zipcode: "97201" },
+  { id: "CUST-016", name: "Mary Rodriguez", city: "Miami", state: "Florida", zipcode: "33101" },
+  { id: "CUST-017", name: "Thomas Walker", city: "Atlanta", state: "Georgia", zipcode: "30301" },
+  { id: "CUST-018", name: "Karen Hernandez", city: "Detroit", state: "Michigan", zipcode: "48201" },
+  { id: "CUST-019", name: "Daniel King", city: "Charlotte", state: "North Carolina", zipcode: "28201" },
+  { id: "CUST-020", name: "Susan Wright", city: "Las Vegas", state: "Nevada", zipcode: "89101" },
 ];
 
 export default function Customers() {

@@ -21,6 +21,16 @@ const initialEmployees: Employee[] = [
   { id: "EMP-008", name: "Lisa Anderson", dateOfBirth: "1994-02-08", age: 29 },
   { id: "EMP-009", name: "Robert Martinez", dateOfBirth: "1986-12-03", age: 37 },
   { id: "EMP-010", name: "Jennifer Thomas", dateOfBirth: "1992-06-20", age: 31 },
+  { id: "EMP-011", name: "Steven Johnson", dateOfBirth: "1985-01-14", age: 38 },
+  { id: "EMP-012", name: "Amanda Wilson", dateOfBirth: "1991-03-27", age: 32 },
+  { id: "EMP-013", name: "Christopher Lee", dateOfBirth: "1988-07-09", age: 35 },
+  { id: "EMP-014", name: "Jessica Garcia", dateOfBirth: "1993-09-02", age: 30 },
+  { id: "EMP-015", name: "Matthew Rodriguez", dateOfBirth: "1987-11-11", age: 36 },
+  { id: "EMP-016", name: "Ashley Martinez", dateOfBirth: "1996-04-18", age: 27 },
+  { id: "EMP-017", name: "Daniel Thompson", dateOfBirth: "1990-08-07", age: 33 },
+  { id: "EMP-018", name: "Stephanie Clark", dateOfBirth: "1989-12-21", age: 34 },
+  { id: "EMP-019", name: "Andrew Lewis", dateOfBirth: "1995-05-30", age: 28 },
+  { id: "EMP-020", name: "Nicole Walker", dateOfBirth: "1993-02-14", age: 30 },
 ];
 
 export default function Employees() {

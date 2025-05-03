@@ -12,11 +12,11 @@ const categoryData = [
 ];
 
 const recentOrders = [
-  { id: "ORD-001", customer: "John Smith", date: "2023-04-23", amount: "$350.00", status: "delivered" },
-  { id: "ORD-002", customer: "Emily Johnson", date: "2023-04-22", amount: "$125.50", status: "shipped" },
-  { id: "ORD-003", customer: "Michael Brown", date: "2023-04-22", amount: "$780.00", status: "processing" },
-  { id: "ORD-004", customer: "Sarah Williams", date: "2023-04-21", amount: "$92.75", status: "delivered" },
-  { id: "ORD-005", customer: "David Miller", date: "2023-04-21", amount: "$215.25", status: "processing" },
+  { id: "ORD-001", customer: "John Smith", date: "2025-05-01", amount: "$350.00", status: "delivered" },
+  { id: "ORD-002", customer: "Emily Johnson", date: "2025-04-30", amount: "$125.50", status: "shipped" },
+  { id: "ORD-003", customer: "Michael Brown", date: "2025-04-29", amount: "$780.00", status: "processing" },
+  { id: "ORD-004", customer: "Sarah Williams", date: "2025-04-28", amount: "$92.75", status: "delivered" },
+  { id: "ORD-005", customer: "David Miller", date: "2025-04-27", amount: "$215.25", status: "processing" },
 ];
 
 const lowStockItems = [

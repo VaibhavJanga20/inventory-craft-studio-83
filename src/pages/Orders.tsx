@@ -12,16 +12,21 @@ type Order = {
 };
 
 const initialOrders: Order[] = [
-  { id: "ORD-001", date: "2024-04-20", status: "Completed", total: 1200.00 },
-  { id: "ORD-002", date: "2024-04-21", status: "Processing", total: 799.99 },
-  { id: "ORD-003", date: "2024-04-22", status: "Pending", total: 145.97 },
-  { id: "ORD-004", date: "2024-04-23", status: "Completed", total: 599.98 },
-  { id: "ORD-005", date: "2024-04-24", status: "Processing", total: 89.99 },
-  { id: "ORD-006", date: "2024-04-25", status: "Completed", total: 299.97 },
-  { id: "ORD-007", date: "2024-04-26", status: "Pending", total: 1499.99 },
-  { id: "ORD-008", date: "2024-04-27", status: "Processing", total: 499.98 },
-  { id: "ORD-009", date: "2024-04-28", status: "Completed", total: 149.99 },
-  { id: "ORD-010", date: "2024-04-29", status: "Pending", total: 999.99 },
+  { id: "ORD-001", date: "2025-05-01", status: "Completed", total: 1200.00 },
+  { id: "ORD-002", date: "2025-04-30", status: "Processing", total: 799.99 },
+  { id: "ORD-003", date: "2025-04-29", status: "Pending", total: 145.97 },
+  { id: "ORD-004", date: "2025-04-28", status: "Completed", total: 599.98 },
+  { id: "ORD-005", date: "2025-04-27", status: "Processing", total: 89.99 },
+  { id: "ORD-006", date: "2025-04-26", status: "Completed", total: 299.97 },
+  { id: "ORD-007", date: "2025-04-25", status: "Pending", total: 1499.99 },
+  { id: "ORD-008", date: "2025-04-24", status: "Processing", total: 499.98 },
+  { id: "ORD-009", date: "2025-04-23", status: "Completed", total: 149.99 },
+  { id: "ORD-010", date: "2025-04-22", status: "Pending", total: 999.99 },
+  { id: "ORD-011", date: "2025-04-21", status: "Completed", total: 450.50 },
+  { id: "ORD-012", date: "2025-04-20", status: "Processing", total: 1275.25 },
+  { id: "ORD-013", date: "2025-04-19", status: "Completed", total: 675.40 },
+  { id: "ORD-014", date: "2025-04-18", status: "Pending", total: 320.15 },
+  { id: "ORD-015", date: "2025-04-17", status: "Processing", total: 890.75 },
 ];
 
 export default function Orders() {
