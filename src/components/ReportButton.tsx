@@ -17,7 +17,7 @@ export function ReportButton({ title, type, data }: ReportButtonProps) {
     <>
       <Button
         variant="outline"
-        className="flex items-center gap-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+        className="flex items-center gap-2 border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
         onClick={() => setIsReportOpen(true)}
       >
         <BarChart3 size={18} />
