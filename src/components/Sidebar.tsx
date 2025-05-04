@@ -29,7 +29,8 @@ const navItems = [
     name: "Reports", 
     path: "/reports", 
     icon: BarChart3,
-    highlight: true 
+    highlight: true,
+    description: "Financial, Inventory & Customer Reports"
   },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
@@ -66,7 +67,12 @@ export function Sidebar() {
                       }
                     />
                   </span>
-                  {item.name}
+                  <div>
+                    <div>{item.name}</div>
+                    {item.description && (
+                      <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                    )}
+                  </div>
                 </Link>
               </li>
             );
