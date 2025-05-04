@@ -1,17 +1,104 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ReportNavigationMenu } from "@/components/ReportNavigationMenu";
 import { BarChart3, Download, FileText, PieChart, Printer, LineChart } from "lucide-react";
+import { renderBarChart, renderPieChart, ChartData } from "@/utils/chartUtils";
+import { useToast } from "@/hooks/use-toast";
+
+// Sample data for charts
+const financialData: ChartData[] = [
+  { name: "Jan", value: 65000 },
+  { name: "Feb", value: 58000 },
+  { name: "Mar", value: 72000 },
+  { name: "Apr", value: 84000 },
+  { name: "May", value: 78000 },
+  { name: "Jun", value: 92000 },
+];
+
+const categoryDistributionData: ChartData[] = [
+  { name: "Electronics", value: 140, fill: "#0088FE" },
+  { name: "Furniture", value: 95, fill: "#00C49F" },
+  { name: "Clothing", value: 100, fill: "#FFBB28" },
+  { name: "Books", value: 75, fill: "#FF8042" },
+  { name: "Kitchen", value: 85, fill: "#8884d8" },
+  { name: "Sports", value: 60, fill: "#9b87f5" },
+];
+
+const customerAcquisitionData: ChartData[] = [
+  { name: "Jan", value: 25 },
+  { name: "Feb", value: 18 },
+  { name: "Mar", value: 30 },
+  { name: "Apr", value: 22 },
+  { name: "May", value: 38 },
+  { name: "Jun", value: 42 },
+];
+
+const retentionRateData: ChartData[] = [
+  { name: "New", value: 246 },
+  { name: "Returning", value: 825 },
+  { name: "Churned", value: 142 },
+];
 
 const Reports = () => {
   const [activeReportCategory, setActiveReportCategory] = useState<string>("financial");
   const [activeReportType, setActiveReportType] = useState<string>("overview");
+  const { toast } = useToast();
   
   const handleReportSelect = (category: string, type: string) => {
     setActiveReportCategory(category);
     setActiveReportType(type);
+  };
+  
+  const handlePrintReport = () => {
+    toast({
+      title: "Printing report",
+      description: "Sending current report to printer..."
+    });
+    window.print();
+  };
+
+  const handleDownloadReport = () => {
+    // Create a simple text version of the report data
+    let reportContent = `${activeReportCategory.toUpperCase()} REPORT - ${activeReportType.toUpperCase()}\n\n`;
+    
+    let data: ChartData[] = [];
+    if (activeReportCategory === "financial") {
+      data = financialData;
+      reportContent += "FINANCIAL DATA:\n";
+    } else if (activeReportCategory === "inventory") {
+      data = categoryDistributionData;
+      reportContent += "INVENTORY DATA:\n";
+    } else if (activeReportCategory === "customer") {
+      data = activeReportType === "customer-acquisition" ? customerAcquisitionData : retentionRateData;
+      reportContent += "CUSTOMER DATA:\n";
+    }
+    
+    data.forEach(item => {
+      reportContent += `${item.name}: ${item.value}\n`;
+    });
+    
+    // Create a Blob with the content
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a download link and trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeReportCategory}-${activeReportType}-report.txt`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Download successful",
+      description: `${activeReportCategory}-${activeReportType}-report.txt has been downloaded`
+    });
   };
   
   return (
@@ -22,11 +109,11 @@ const Reports = () => {
           <p className="text-muted-foreground">View and generate various reports for your business.</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handlePrintReport}>
             <Printer className="mr-2 h-4 w-4" />
             Print Report
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleDownloadReport}>
             <Download className="mr-2 h-4 w-4" />
             Download
           </Button>
@@ -102,8 +189,8 @@ const Reports = () => {
                       <BarChart3 className="h-5 w-5 mr-2" />
                       <h3 className="font-medium">Revenue Trends (Last 12 Months)</h3>
                     </div>
-                    <div className="h-[220px] flex items-center justify-center text-muted-foreground">
-                      [Revenue Chart Visualization]
+                    <div className="h-[220px]">
+                      {renderBarChart(financialData)}
                     </div>
                   </div>
                 </div>
@@ -208,8 +295,8 @@ const Reports = () => {
                       <BarChart3 className="h-5 w-5 mr-2" />
                       <h3 className="font-medium">Current Stock Levels by Category</h3>
                     </div>
-                    <div className="h-[220px] flex items-center justify-center text-muted-foreground">
-                      [Stock Levels Chart]
+                    <div className="h-[220px]">
+                      {renderBarChart(categoryDistributionData)}
                     </div>
                   </div>
                   <Card>
@@ -243,8 +330,8 @@ const Reports = () => {
                       <PieChart className="h-5 w-5 mr-2" />
                       <h3 className="font-medium">Inventory Distribution by Category</h3>
                     </div>
-                    <div className="h-[220px] flex items-center justify-center text-muted-foreground">
-                      [Category Distribution Chart]
+                    <div className="h-[220px]">
+                      {renderPieChart(categoryDistributionData)}
                     </div>
                   </div>
                 </div>
@@ -263,8 +350,8 @@ const Reports = () => {
                       <LineChart className="h-5 w-5 mr-2" />
                       <h3 className="font-medium">Customer Acquisition Trends</h3>
                     </div>
-                    <div className="h-[220px] flex items-center justify-center text-muted-foreground">
-                      [Customer Acquisition Chart]
+                    <div className="h-[220px]">
+                      {renderBarChart(customerAcquisitionData)}
                     </div>
                   </div>
                   <Card>
@@ -298,8 +385,8 @@ const Reports = () => {
                       <PieChart className="h-5 w-5 mr-2" />
                       <h3 className="font-medium">Customer Retention Analysis</h3>
                     </div>
-                    <div className="h-[220px] flex items-center justify-center text-muted-foreground">
-                      [Retention Rate Chart]
+                    <div className="h-[220px]">
+                      {renderPieChart(retentionRateData)}
                     </div>
                   </div>
                 </div>

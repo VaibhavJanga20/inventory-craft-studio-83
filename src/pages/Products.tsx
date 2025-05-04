@@ -1,10 +1,11 @@
-
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
 import { Filter, Plus } from "lucide-react";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
 import { ReportButton } from "../components/ReportButton";
+import { EditDialog } from "../components/EditDialog";
+import { useToast } from "@/hooks/use-toast";
 
 type Product = {
   id: string;
@@ -41,6 +42,9 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { toast } = useToast();
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,6 +86,33 @@ export default function Products() {
       stock: parseInt(data.stock)
     };
     setProducts([...products, newProduct]);
+  };
+  
+  const handleEdit = (product: Product) => {
+    setSelectedProduct(product);
+    setIsEditDialogOpen(true);
+  };
+  
+  const handleSave = (data: Record<string, any>) => {
+    if (!selectedProduct) return;
+    
+    const updatedProducts = products.map(product => 
+      product.id === selectedProduct.id
+        ? { 
+            ...product, 
+            name: data.name,
+            category: data.category,
+            price: parseFloat(data.price),
+            stock: parseInt(data.stock)
+          }
+        : product
+    );
+    
+    setProducts(updatedProducts);
+    toast({
+      title: "Product updated",
+      description: `${data.name} has been successfully updated.`
+    });
   };
 
   return (
@@ -156,9 +187,9 @@ export default function Products() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-center">
-                      <button className="text-gray-400 hover:text-gray-500">
-                        <Filter size={16} />
-                      </button>
+                      <Button variant="ghost" onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-800">
+                        Edit
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -180,6 +211,21 @@ export default function Products() {
           { name: "stock", label: "Stock", type: "number" }
         ]}
       />
+      
+      {selectedProduct && (
+        <EditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleSave}
+          title="Product"
+          fields={[
+            { name: "name", label: "Name", type: "text", value: selectedProduct.name },
+            { name: "category", label: "Category", type: "text", value: selectedProduct.category },
+            { name: "price", label: "Price", type: "number", value: selectedProduct.price },
+            { name: "stock", label: "Stock", type: "number", value: selectedProduct.stock }
+          ]}
+        />
+      )}
     </div>
   );
 }
