@@ -11,6 +11,7 @@ import {
   Warehouse,
   Settings,
   User,
+  FileText,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { name: "Customers", path: "/customers", icon: User },
   { name: "Employees", path: "/employees", icon: UserCircle },
   { name: "Warehouses", path: "/warehouses", icon: Warehouse },
+  { name: "Reports", path: "/reports", icon: FileText },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
 
