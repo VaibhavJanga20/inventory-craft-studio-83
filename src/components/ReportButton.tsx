@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ReportDialog } from "./ReportDialog";
+import { useToast } from "@/hooks/use-toast";
 
 type ReportButtonProps = {
   title: string;
@@ -11,26 +11,24 @@ type ReportButtonProps = {
 };
 
 export function ReportButton({ title, type, data }: ReportButtonProps) {
-  const [isReportOpen, setIsReportOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleReportClick = () => {
+    toast({
+      title: "Reports Feature Removed",
+      description: "The reports feature has been temporarily disabled.",
+      variant: "default"
+    });
+  };
 
   return (
-    <>
-      <Button
-        variant="outline"
-        className="flex items-center gap-2 border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
-        onClick={() => setIsReportOpen(true)}
-      >
-        <BarChart3 size={18} />
-        <span>Reports</span>
-      </Button>
-      
-      <ReportDialog
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        title={title}
-        type={type}
-        data={data}
-      />
-    </>
+    <Button
+      variant="outline"
+      className="flex items-center gap-2 border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
+      onClick={handleReportClick}
+    >
+      <BarChart3 size={18} />
+      <span>Reports</span>
+    </Button>
   );
 }

@@ -11,8 +11,6 @@ import {
   Warehouse,
   Settings,
   User,
-  FileText,
-  BarChart3,
 } from "lucide-react";
 
 const navItems = [
@@ -25,13 +23,6 @@ const navItems = [
   { name: "Customers", path: "/customers", icon: User },
   { name: "Employees", path: "/employees", icon: UserCircle },
   { name: "Warehouses", path: "/warehouses", icon: Warehouse },
-  { 
-    name: "Reports", 
-    path: "/reports", 
-    icon: BarChart3,
-    highlight: true,
-    description: "Financial, Inventory & Customer Reports"
-  },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
 
@@ -54,17 +45,13 @@ export function Sidebar() {
                   className={`flex items-center px-4 py-2.5 rounded-md text-sm group ${
                     isActive
                       ? "bg-purple-100 text-purple-600"
-                      : item.highlight
-                      ? "text-purple-600 hover:bg-purple-50"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
                   <span className="mr-3">
                     <item.icon
                       size={18}
-                      className={
-                        isActive || item.highlight ? "text-purple-600" : "text-gray-500"
-                      }
+                      className={isActive ? "text-purple-600" : "text-gray-500"}
                     />
                   </span>
                   <div>

@@ -8,9 +8,10 @@ export type ChartData = {
   fill?: string;
 };
 
+// Simple exported functions for future use without rendering
 export const renderBarChart = (data: ChartData[], height: number = 220) => {
   if (!data || data.length === 0) {
-    return <div className="flex items-center justify-center h-full text-muted-foreground">No data available</div>;
+    return null;
   }
 
   return (
@@ -27,7 +28,7 @@ export const renderBarChart = (data: ChartData[], height: number = 220) => {
 
 export const renderPieChart = (data: ChartData[], height: number = 220) => {
   if (!data || data.length === 0) {
-    return <div className="flex items-center justify-center h-full text-muted-foreground">No data available</div>;
+    return null;
   }
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#9b87f5', '#82ca9d'];
