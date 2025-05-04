@@ -1,11 +1,12 @@
 
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
 import { ReportButton } from "../components/ReportButton";
+import { toast } from "@/components/ui/sonner";
 
 type Product = {
   id: string;
@@ -59,6 +60,7 @@ export default function Products() {
         : product
     );
     setProducts(updatedProducts);
+    toast.success("Product updated successfully");
   };
 
   const handleAdd = (data: Record<string, any>) => {
@@ -70,6 +72,13 @@ export default function Products() {
       stock: parseInt(data.stock)
     };
     setProducts([...products, newProduct]);
+    toast.success("Product added successfully");
+  };
+
+  const handleDelete = (productId: string) => {
+    const updatedProducts = products.filter(product => product.id !== productId);
+    setProducts(updatedProducts);
+    toast.success("Product deleted successfully");
   };
 
   return (
@@ -80,7 +89,7 @@ export default function Products() {
           <p className="text-gray-600 text-sm">Manage your product catalog</p>
         </div>
         <div className="flex space-x-3">
-          <ReportButton title="Products" type="products" data={products} />
+          <ReportButton title="Products" type="products" data={products.sort((a, b) => b.stock - a.stock)} />
           <Button 
             className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
             onClick={() => setIsAddDialogOpen(true)}
@@ -110,7 +119,7 @@ export default function Products() {
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -122,13 +131,24 @@ export default function Products() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.price.toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.stock}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleEdit(product)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </Button>
+                    <div className="flex justify-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(product)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(product.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash size={16} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

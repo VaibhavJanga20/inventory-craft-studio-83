@@ -3,11 +3,15 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportNavigationMenu } from "@/components/ReportNavigationMenu";
+import { renderBarChart, renderPieChart, ChartData } from "@/utils/chartUtils";
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, Cell
-} from "recharts";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
 export default function Reports() {
   const [reportCategory, setReportCategory] = useState<string>("financial");
@@ -15,25 +19,50 @@ export default function Reports() {
   
   // Financial data
   const revenueData = [
-    { month: "Jan", value: 24500 },
-    { month: "Feb", value: 29300 },
-    { month: "Mar", value: 35200 },
-    { month: "Apr", value: 30100 },
-    { month: "May", value: 42000 },
+    { name: "Jan", value: 24500 },
+    { name: "Feb", value: 29300 },
+    { name: "Mar", value: 35200 },
+    { name: "Apr", value: 30100 },
+    { name: "May", value: 42000 },
   ];
 
   const expensesData = [
-    { month: "Jan", value: 18200 },
-    { month: "Feb", value: 20500 },
-    { month: "Mar", value: 22800 },
-    { month: "Apr", value: 21300 },
-    { month: "May", value: 25000 },
+    { name: "Jan", value: 18200 },
+    { name: "Feb", value: 20500 },
+    { name: "Mar", value: 22800 },
+    { name: "Apr", value: 21300 },
+    { name: "May", value: 25000 },
   ];
 
   const profitData = revenueData.map((item, index) => ({
-    month: item.month,
+    name: item.month || item.name,
     value: item.value - expensesData[index].value
   }));
+
+  // Balance sheet data
+  const assetsData: ChartData[] = [
+    { name: "Cash", value: 85000 },
+    { name: "Accounts Receivable", value: 45000 },
+    { name: "Inventory", value: 120000 },
+    { name: "Equipment", value: 75000 },
+    { name: "Real Estate", value: 250000 }
+  ];
+
+  const liabilitiesData: ChartData[] = [
+    { name: "Accounts Payable", value: 35000 },
+    { name: "Short-term Loans", value: 50000 },
+    { name: "Long-term Debt", value: 180000 },
+    { name: "Taxes Payable", value: 25000 }
+  ];
+
+  // Cash flow data
+  const cashFlowData = [
+    { name: "Jan", value: 15000 },
+    { name: "Feb", value: 18000 },
+    { name: "Mar", value: 12000 },
+    { name: "Apr", value: 20000 },
+    { name: "May", value: 25000 },
+  ];
 
   // Inventory data
   const stockLevelData = [
@@ -44,7 +73,7 @@ export default function Reports() {
     { category: "Sports", inStock: 190, lowStock: 15, outOfStock: 4 },
   ];
 
-  const categoryDistributionData = [
+  const categoryDistributionData: ChartData[] = [
     { name: "Electronics", value: 500 },
     { name: "Furniture", value: 244 },
     { name: "Clothing", value: 634 },
@@ -61,20 +90,20 @@ export default function Reports() {
   ];
 
   // Customer data
-  const customerAcquisitionData = [
-    { month: "Jan", value: 45 },
-    { month: "Feb", value: 52 },
-    { month: "Mar", value: 48 },
-    { month: "Apr", value: 70 },
-    { month: "May", value: 65 },
+  const customerAcquisitionData: ChartData[] = [
+    { name: "Jan", value: 45 },
+    { name: "Feb", value: 52 },
+    { name: "Mar", value: 48 },
+    { name: "Apr", value: 70 },
+    { name: "May", value: 65 },
   ];
 
-  const retentionRateData = [
+  const retentionRateData: ChartData[] = [
     { name: "Retained", value: 76 },
     { name: "Churned", value: 24 },
   ];
 
-  const geographicDistributionData = [
+  const geographicDistributionData: ChartData[] = [
     { name: "California", value: 28 },
     { name: "Texas", value: 17 },
     { name: "New York", value: 15 },
@@ -102,7 +131,7 @@ export default function Reports() {
                 <CardDescription>Summary of key financial metrics</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="bg-purple-50 p-4 rounded-lg">
                     <p className="text-sm text-gray-500">Total Revenue</p>
                     <p className="text-2xl font-semibold">${revenueData.reduce((acc, item) => acc + item.value, 0).toLocaleString()}</p>
@@ -128,41 +157,17 @@ export default function Reports() {
                   </TabsList>
                   <TabsContent value="revenue">
                     <div className="h-80">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={revenueData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
-                          <Bar dataKey="value" fill="#8B5CF6" name="Revenue" />
-                        </BarChart>
-                      </ResponsiveContainer>
+                      {renderBarChart(revenueData, 300)}
                     </div>
                   </TabsContent>
                   <TabsContent value="expenses">
                     <div className="h-80">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={expensesData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip formatter={(value) => [`$${value}`, 'Expenses']} />
-                          <Bar dataKey="value" fill="#0EA5E9" name="Expenses" />
-                        </BarChart>
-                      </ResponsiveContainer>
+                      {renderBarChart(expensesData, 300)}
                     </div>
                   </TabsContent>
                   <TabsContent value="profit">
                     <div className="h-80">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={profitData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip formatter={(value) => [`$${value}`, 'Profit']} />
-                          <Line type="monotone" dataKey="value" stroke="#10B981" name="Profit" />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      {renderBarChart(profitData, 300)}
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -170,37 +175,140 @@ export default function Reports() {
             </Card>
           </div>
         );
-      } else if (reportType === "income-statement") {
+      } else if (reportType === "balance-sheet") {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Income Statement</CardTitle>
-              <CardDescription>Revenue and expenses for the current period</CardDescription>
+              <CardTitle>Balance Sheet</CardTitle>
+              <CardDescription>Assets and liabilities overview</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-80 mb-6">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={revenueData} margin={{ top: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" name="Revenue" fill="#8B5CF6" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Assets</h3>
+                  {renderPieChart(assetsData, 300)}
+                  <Table className="mt-4">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {assetsData.map((item) => (
+                        <TableRow key={item.name}>
+                          <TableCell>{item.name}</TableCell>
+                          <TableCell className="text-right">${item.value.toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell className="font-bold">Total Assets</TableCell>
+                        <TableCell className="text-right font-bold">
+                          ${assetsData.reduce((acc, item) => acc + item.value, 0).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Liabilities</h3>
+                  {renderPieChart(liabilitiesData, 300)}
+                  <Table className="mt-4">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {liabilitiesData.map((item) => (
+                        <TableRow key={item.name}>
+                          <TableCell>{item.name}</TableCell>
+                          <TableCell className="text-right">${item.value.toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell className="font-bold">Total Liabilities</TableCell>
+                        <TableCell className="text-right font-bold">
+                          ${liabilitiesData.reduce((acc, item) => acc + item.value, 0).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Equity</h3>
+                <p className="text-2xl font-semibold">
+                  ${(assetsData.reduce((acc, item) => acc + item.value, 0) - 
+                     liabilitiesData.reduce((acc, item) => acc + item.value, 0)).toLocaleString()}
+                </p>
               </div>
             </CardContent>
           </Card>
         );
+      } else if (reportType === "cash-flow") {
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Cash Flow</CardTitle>
+              <CardDescription>Cash movement over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                {renderBarChart(cashFlowData, 300)}
+              </div>
+              <Table className="mt-8">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Month</TableHead>
+                    <TableHead className="text-right">Cash Flow</TableHead>
+                    <TableHead className="text-right">Change</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cashFlowData.map((item, index) => (
+                    <TableRow key={item.name}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell className="text-right">${item.value.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">
+                        {index > 0 ? (
+                          <span className={item.value > cashFlowData[index-1].value ? "text-green-600" : "text-red-600"}>
+                            {item.value > cashFlowData[index-1].value ? "+" : ""}
+                            {(item.value - cashFlowData[index-1].value).toLocaleString()}
+                          </span>
+                        ) : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        );
       } else {
-        return <p>Select a financial report type to view</p>;
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Reports</CardTitle>
+              <CardDescription>Select a financial report type to view detailed information</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center items-center h-64">
+              <p className="text-muted-foreground">Please select a specific report type from the navigation menu above</p>
+            </CardContent>
+          </Card>
+        );
       }
     }
     
     // Inventory Reports
     else if (reportCategory === "inventory") {
       if (reportType === "stock-levels") {
+        const stockLevelChartData = stockLevelData.map(item => ({
+          name: item.category,
+          value: item.inStock + item.lowStock + item.outOfStock
+        }));
+
         return (
           <Card>
             <CardHeader>
@@ -209,44 +317,33 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stockLevelData} margin={{ top: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="inStock" name="In Stock" stackId="a" fill="#10B981" />
-                    <Bar dataKey="lowStock" name="Low Stock" stackId="a" fill="#F59E0B" />
-                    <Bar dataKey="outOfStock" name="Out of Stock" stackId="a" fill="#EF4444" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {renderBarChart(stockLevelChartData, 300)}
               </div>
               
               <div className="mt-8">
                 <h3 className="font-medium mb-4">Low Stock Items</h3>
-                <table className="min-w-full border border-gray-200 rounded-md">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left">ID</th>
-                      <th className="px-4 py-2 text-left">Product Name</th>
-                      <th className="px-4 py-2 text-left">Category</th>
-                      <th className="px-4 py-2 text-left">Quantity</th>
-                      <th className="px-4 py-2 text-left">Threshold</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lowStockItems.map((item, index) => (
-                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                        <td className="px-4 py-2">{item.id}</td>
-                        <td className="px-4 py-2">{item.name}</td>
-                        <td className="px-4 py-2">{item.category}</td>
-                        <td className="px-4 py-2">{item.quantity}</td>
-                        <td className="px-4 py-2">{item.threshold}</td>
-                      </tr>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Product Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Threshold</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {lowStockItems.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>{item.name}</TableCell>
+                        <TableCell>{item.category}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>{item.threshold}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
@@ -260,33 +357,46 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryDistributionData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={150}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {categoryDistributionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [value, 'Items']} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {renderPieChart(categoryDistributionData, 300)}
               </div>
+              <Table className="mt-8">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Items</TableHead>
+                    <TableHead className="text-right">Percentage</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {categoryDistributionData.map((item) => {
+                    const total = categoryDistributionData.reduce((acc, cat) => acc + cat.value, 0);
+                    const percentage = ((item.value / total) * 100).toFixed(1);
+                    
+                    return (
+                      <TableRow key={item.name}>
+                        <TableCell>{item.name}</TableCell>
+                        <TableCell className="text-right">{item.value}</TableCell>
+                        <TableCell className="text-right">{percentage}%</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         );
       } else {
-        return <p>Select an inventory report type to view</p>;
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Inventory Reports</CardTitle>
+              <CardDescription>Select an inventory report type to view detailed information</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center items-center h-64">
+              <p className="text-muted-foreground">Please select a specific report type from the navigation menu above</p>
+            </CardContent>
+          </Card>
+        );
       }
     }
     
@@ -301,17 +411,32 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={customerAcquisitionData} margin={{ top: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="value" name="New Customers" stroke="#8B5CF6" />
-                  </LineChart>
-                </ResponsiveContainer>
+                {renderBarChart(customerAcquisitionData, 300)}
               </div>
+              <Table className="mt-8">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Month</TableHead>
+                    <TableHead className="text-right">New Customers</TableHead>
+                    <TableHead className="text-right">Growth</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {customerAcquisitionData.map((item, index) => (
+                    <TableRow key={item.name}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell className="text-right">{item.value}</TableCell>
+                      <TableCell className="text-right">
+                        {index > 0 ? (
+                          <span className={item.value > customerAcquisitionData[index-1].value ? "text-green-600" : "text-red-600"}>
+                            {((item.value - customerAcquisitionData[index-1].value) / customerAcquisitionData[index-1].value * 100).toFixed(1)}%
+                          </span>
+                        ) : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         );
@@ -324,28 +449,24 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={geographicDistributionData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={150}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {geographicDistributionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {renderPieChart(geographicDistributionData, 300)}
               </div>
+              <Table className="mt-8">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>State</TableHead>
+                    <TableHead className="text-right">Customers (%)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {geographicDistributionData.map((item) => (
+                    <TableRow key={item.name}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell className="text-right">{item.value}%</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         );
@@ -358,38 +479,55 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={retentionRateData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={150}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      <Cell fill="#10B981" /> {/* Retained */}
-                      <Cell fill="#EF4444" /> {/* Churned */}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {renderPieChart(retentionRateData, 300)}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                <div className="bg-green-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-medium mb-2 text-green-800">Retained Customers</h3>
+                  <p className="text-3xl font-bold text-green-700">{retentionRateData[0].value}%</p>
+                  <p className="mt-2 text-sm text-green-600">
+                    A retention rate of {retentionRateData[0].value}% indicates strong customer loyalty
+                  </p>
+                </div>
+                <div className="bg-red-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-medium mb-2 text-red-800">Customer Churn</h3>
+                  <p className="text-3xl font-bold text-red-700">{retentionRateData[1].value}%</p>
+                  <p className="mt-2 text-sm text-red-600">
+                    Working to reduce the {retentionRateData[1].value}% churn rate could significantly impact revenue
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
         );
       } else {
-        return <p>Select a customer report type to view</p>;
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Customer Reports</CardTitle>
+              <CardDescription>Select a customer report type to view detailed information</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center items-center h-64">
+              <p className="text-muted-foreground">Please select a specific report type from the navigation menu above</p>
+            </CardContent>
+          </Card>
+        );
       }
     }
     
     // Default
     else {
-      return <p>Select a report category to view</p>;
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle>Reports Dashboard</CardTitle>
+            <CardDescription>Select a report category and type from the navigation menu above</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center items-center h-64">
+            <p className="text-muted-foreground">Please select a report category and type to view detailed information</p>
+          </CardContent>
+        </Card>
+      );
     }
   };
 

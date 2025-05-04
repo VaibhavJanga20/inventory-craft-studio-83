@@ -1,4 +1,5 @@
 
+import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 export type ChartData = {

@@ -1,10 +1,12 @@
 
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Edit, Trash } from "lucide-react";
 import { EditDialog } from "../components/EditDialog";
+import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
 import { ReportButton } from "../components/ReportButton";
+import { toast } from "@/components/ui/sonner";
 
 type Supplier = {
   id: string;
@@ -36,6 +38,7 @@ export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,6 +69,29 @@ export default function Suppliers() {
         : supplier
     );
     setSuppliers(updatedSuppliers);
+    toast.success("Supplier updated successfully");
+  };
+  
+  const handleDelete = (supplierId: string) => {
+    const updatedSuppliers = suppliers.filter(supplier => supplier.id !== supplierId);
+    setSuppliers(updatedSuppliers);
+    toast.success("Supplier deleted successfully");
+  };
+  
+  const handleAdd = (data: Record<string, any>) => {
+    const newSupplier: Supplier = {
+      id: `SUP-${String(suppliers.length + 1).padStart(3, '0')}`,
+      name: data.name,
+      location: {
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode,
+        country: "US"
+      },
+      activeOrders: parseInt(data.activeOrders || "0")
+    };
+    setSuppliers([...suppliers, newSupplier]);
+    toast.success("Supplier added successfully");
   };
 
   return (
@@ -77,10 +103,13 @@ export default function Suppliers() {
         </div>
         <div className="flex space-x-3">
           <ReportButton title="Suppliers" type="suppliers" data={suppliers} />
-          <button className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors">
+          <Button 
+            className="px-4 py-2 bg-purple-500 text-white rounded-md flex items-center hover:bg-purple-600 transition-colors"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
             <Plus size={18} className="mr-2" />
             Add Supplier
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -102,7 +131,7 @@ export default function Suppliers() {
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Orders</th>
-                <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -120,14 +149,25 @@ export default function Suppliers() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{supplier.activeOrders}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleEdit(supplier)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </Button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                    <div className="flex justify-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(supplier)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(supplier.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash size={16} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -151,6 +191,20 @@ export default function Suppliers() {
           ]}
         />
       )}
+
+      <AddDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onAdd={handleAdd}
+        title="Supplier"
+        fields={[
+          { name: "name", label: "Name", type: "text" },
+          { name: "city", label: "City", type: "text" },
+          { name: "state", label: "State", type: "text" },
+          { name: "zipCode", label: "Zip Code", type: "text" },
+          { name: "activeOrders", label: "Active Orders", type: "number" }
+        ]}
+      />
     </div>
   );
 }

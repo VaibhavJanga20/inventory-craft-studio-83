@@ -1,10 +1,12 @@
 
 import { useState } from "react";
 import { SearchBar } from "../components/SearchBar";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Edit, Trash } from "lucide-react";
+import { EditDialog } from "../components/EditDialog";
 import { AddDialog } from "../components/AddDialog";
 import { Button } from "@/components/ui/button";
 import { ReportButton } from "../components/ReportButton";
+import { toast } from "@/components/ui/sonner";
 
 type Warehouse = {
   id: string;
@@ -37,6 +39,8 @@ export default function Warehouses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [warehouses, setWarehouses] = useState<Warehouse[]>(initialWarehouses);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
 
   const filteredWarehouses = warehouses.filter(warehouse =>
     warehouse.location.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,6 +77,40 @@ export default function Warehouses() {
       }
     };
     setWarehouses([...warehouses, newWarehouse]);
+    toast.success("Warehouse added successfully");
+  };
+  
+  const handleEdit = (warehouse: Warehouse) => {
+    setSelectedWarehouse(warehouse);
+    setIsEditDialogOpen(true);
+  };
+  
+  const handleSave = (data: Record<string, any>) => {
+    const updatedWarehouses = warehouses.map((warehouse) =>
+      warehouse.id === selectedWarehouse?.id
+        ? {
+            ...warehouse,
+            location: {
+              city: data.city,
+              state: data.state,
+              zipCode: data.zipCode
+            },
+            managedBy: data.managedBy,
+            capacity: {
+              used: parseInt(data.usedCapacity),
+              total: parseInt(data.totalCapacity)
+            }
+          }
+        : warehouse
+    );
+    setWarehouses(updatedWarehouses);
+    toast.success("Warehouse updated successfully");
+  };
+  
+  const handleDelete = (warehouseId: string) => {
+    const updatedWarehouses = warehouses.filter(warehouse => warehouse.id !== warehouseId);
+    setWarehouses(updatedWarehouses);
+    toast.success("Warehouse deleted successfully");
   };
 
   return (
@@ -112,7 +150,7 @@ export default function Warehouses() {
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Managed By</th>
                 <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-                <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -140,7 +178,26 @@ export default function Warehouses() {
                       ></div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 text-center">Edit</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                    <div className="flex justify-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(warehouse)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Edit size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(warehouse.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash size={16} />
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -162,6 +219,23 @@ export default function Warehouses() {
           { name: "totalCapacity", label: "Total Capacity", type: "number" }
         ]}
       />
+      
+      {selectedWarehouse && (
+        <EditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={handleSave}
+          title="Warehouse"
+          fields={[
+            { name: "city", label: "City", type: "text", value: selectedWarehouse.location.city },
+            { name: "state", label: "State", type: "text", value: selectedWarehouse.location.state },
+            { name: "zipCode", label: "Zip Code", type: "text", value: selectedWarehouse.location.zipCode },
+            { name: "managedBy", label: "Managed By", type: "text", value: selectedWarehouse.managedBy },
+            { name: "usedCapacity", label: "Used Capacity", type: "number", value: selectedWarehouse.capacity.used },
+            { name: "totalCapacity", label: "Total Capacity", type: "number", value: selectedWarehouse.capacity.total }
+          ]}
+        />
+      )}
     </div>
   );
 }
