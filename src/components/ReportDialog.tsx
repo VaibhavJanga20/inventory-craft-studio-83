@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -8,6 +9,21 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { renderBarChart, renderPieChart, ChartData } from "@/utils/chartUtils";
+import { Button } from "@/components/ui/button";
+import { Printer, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend,
+  PieChart, 
+  Pie, 
+  Cell 
+} from "recharts";
 
 type ReportDialogProps = {
   isOpen: boolean;
