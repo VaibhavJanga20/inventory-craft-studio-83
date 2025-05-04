@@ -1,13 +1,13 @@
-
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { 
-  BarChart, Bar, LineChart, Line, PieChart, Pie, 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-  ResponsiveContainer, Cell 
-} from "recharts";
-import { Printer } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { renderBarChart, renderPieChart, ChartData } from "@/utils/chartUtils";
 
 type ReportDialogProps = {
   isOpen: boolean;
